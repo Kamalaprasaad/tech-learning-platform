@@ -1,131 +1,136 @@
 // Main Application Logic
 class LearningPlatform {
-    constructor() {
-        this.currentTopic = null;
-        this.completedTopics = this.loadProgress();
-        this.init();
-    }
+  constructor() {
+    this.currentTopic = null;
+    this.completedTopics = this.loadProgress();
+    this.init();
+  }
 
-    init() {
-        this.renderTopicList();
-        this.updateProgress();
-        this.setupEventListeners();
-    }
+  init() {
+    this.renderTopicList();
+    this.updateProgress();
+    this.setupEventListeners();
+  }
 
-    setupEventListeners() {
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+  setupEventListeners() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
 
-        // Handle browser back/forward
-        window.addEventListener('popstate', (e) => {
-            if (e.state && e.state.topicId) {
-                this.loadTopic(e.state.topicId, false);
-            }
-        });
-    }
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.topicId) {
+        this.loadTopic(e.state.topicId, false);
+      }
+    });
+  }
 
-    handleSearch(query) {
-        const topicButtons = document.querySelectorAll('.topic-button');
-        const lowerQuery = query.toLowerCase();
+  handleSearch(query) {
+    const topicButtons = document.querySelectorAll('.topic-button');
+    const lowerQuery = query.toLowerCase();
 
-        topicButtons.forEach(button => {
-            const topicText = button.textContent.toLowerCase();
-            const topicItem = button.parentElement;
+    topicButtons.forEach(button => {
+      const topicText = button.textContent.toLowerCase();
+      const topicItem = button.parentElement;
 
-            if (topicText.includes(lowerQuery)) {
-                topicItem.style.display = '';
-            } else {
-                topicItem.style.display = 'none';
-            }
-        });
-    }
+      if (topicText.includes(lowerQuery)) {
+        topicItem.style.display = '';
+      } else {
+        topicItem.style.display = 'none';
+      }
+    });
+  }
 
-    renderTopicList() {
-        const topicList = document.getElementById('topicList');
-        topicList.innerHTML = '';
+  renderTopicList() {
+    const topicList = document.getElementById('topicList');
+    topicList.innerHTML = '';
 
-        Object.values(allTopics).forEach(topic => {
-            const li = document.createElement('li');
-            li.className = 'topic-item';
+    Object.values(allTopics).forEach(topic => {
+      const li = document.createElement('li');
+      li.className = 'topic-item';
 
-            const button = document.createElement('button');
-            button.className = 'topic-button';
-            if (this.completedTopics.includes(topic.id)) {
-                button.classList.add('completed');
-            }
+      const button = document.createElement('button');
+      button.className = 'topic-button';
+      if (this.completedTopics.includes(topic.id)) {
+        button.classList.add('completed');
+      }
 
-            button.innerHTML = `
+      button.innerHTML = `
         <span class="topic-number">${topic.id}</span>
         <span>${topic.title}</span>
       `;
 
-            button.addEventListener('click', () => this.loadTopic(topic.id));
+      button.addEventListener('click', () => this.loadTopic(topic.id));
 
-            li.appendChild(button);
-            topicList.appendChild(li);
-        });
+      li.appendChild(button);
+      topicList.appendChild(li);
+    });
+  }
+
+  loadTopic(topicId, updateHistory = true) {
+    const topic = allTopics[topicId];
+    if (!topic) return;
+
+    this.currentTopic = topicId;
+
+    // Update active state
+    document.querySelectorAll('.topic-button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelectorAll('.topic-button')[topicId - 1]?.classList.add('active');
+
+    // Render topic content
+    this.renderTopicContent(topic);
+
+    // Update browser history
+    if (updateHistory) {
+      history.pushState({ topicId }, topic.title, `#topic-${topicId}`);
     }
 
-    loadTopic(topicId, updateHistory = true) {
-        const topic = allTopics[topicId];
-        if (!topic) return;
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-        this.currentTopic = topicId;
+  renderTopicContent(topic) {
+    const mainContent = document.getElementById('mainContent');
 
-        // Update active state
-        document.querySelectorAll('.topic-button').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        document.querySelectorAll('.topic-button')[topicId - 1]?.classList.add('active');
-
-        // Render topic content
-        this.renderTopicContent(topic);
-
-        // Update browser history
-        if (updateHistory) {
-            history.pushState({ topicId }, topic.title, `#topic-${topicId}`);
-        }
-
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    renderTopicContent(topic) {
-        const mainContent = document.getElementById('mainContent');
-
-        let html = `
+    let html = `
       <div class="topic-header">
         <h1 class="topic-title">${topic.icon} ${topic.title}</h1>
         <p class="topic-subtitle">${topic.subtitle}</p>
       </div>
     `;
 
-        // Render sections
-        topic.sections.forEach((section, index) => {
-            html += `
+    // Render sections
+    topic.sections.forEach((section, index) => {
+      html += `
         <div class="section">
           <h2 class="section-title">${section.title}</h2>
       `;
 
-            if (section.type === 'explanation') {
-                html += `<div class="explanation">${this.formatContent(section.content)}</div>`;
-            } else if (section.type === 'code') {
-                html += `
+      if (section.type === 'explanation') {
+        html += `<div class="explanation">${this.formatContent(section.content)}</div>`;
+      } else if (section.type === 'code') {
+        html += `
           <div class="explanation">${this.formatContent(section.content)}</div>
         `;
-            }
+      }
 
-            html += `</div>`;
-        });
+      html += `</div>`;
+    });
 
-        // Add interactive demo section
-        if (topic.interactive) {
-            html += this.renderInteractiveDemo(topic);
-        }
+    // Add video resources section if available
+    if (videoResources[topic.id]) {
+      html += this.renderVideoResources(topic.id);
+    }
 
-        // Add navigation buttons
-        html += `
+    // Add interactive demo section
+    if (topic.interactive) {
+      html += this.renderInteractiveDemo(topic);
+    }
+
+    // Add navigation buttons
+    html += `
       <div class="button-group">
         ${topic.id > 1 ? `<button class="btn" onclick="app.loadTopic(${topic.id - 1})">← Previous Topic</button>` : ''}
         <button class="btn ${this.completedTopics.includes(topic.id) ? 'btn-success' : 'btn-primary'}" onclick="app.markComplete(${topic.id})">
@@ -135,19 +140,19 @@ class LearningPlatform {
       </div>
     `;
 
-        mainContent.innerHTML = html;
+    mainContent.innerHTML = html;
 
-        // Initialize code blocks
-        this.initializeCodeBlocks();
-    }
+    // Initialize code blocks
+    this.initializeCodeBlocks();
+  }
 
-    formatContent(content) {
-        // Convert markdown-style formatting to HTML
-        return content
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-            .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-                return `
+  formatContent(content) {
+    // Convert markdown-style formatting to HTML
+    return content
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+      .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+        return `
           <div class="code-block">
             <div class="code-header">
               <span class="code-language">${lang || 'code'}</span>
@@ -156,48 +161,84 @@ class LearningPlatform {
             <pre><code>${this.escapeHtml(code.trim())}</code></pre>
           </div>
         `;
-            })
-            .replace(/\n• /g, '\n<li>')
-            .replace(/(<li>.*?)(?=\n|$)/g, '$1</li>')
-            .replace(/(<li>[\s\S]*<\/li>)/g, '<ul class="styled-list">$1</ul>')
-            .replace(/\n\n/g, '</p><p class="explanation">')
-            .replace(/^(?!<)/, '<p class="explanation">')
-            .replace(/(?!>)$/, '</p>');
-    }
+      })
+      .replace(/\n• /g, '\n<li>')
+      .replace(/(<li>.*?)(?=\n|$)/g, '$1</li>')
+      .replace(/(<li>[\s\S]*<\/li>)/g, '<ul class="styled-list">$1</ul>')
+      .replace(/\n\n/g, '</p><p class="explanation">')
+      .replace(/^(?!<)/, '<p class="explanation">')
+      .replace(/(?!>)$/, '</p>');
+  }
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
-    initializeCodeBlocks() {
-        // Add syntax highlighting classes (basic)
-        document.querySelectorAll('code').forEach(block => {
-            if (block.parentElement.tagName === 'PRE') {
-                this.highlightCode(block);
-            }
-        });
-    }
+  initializeCodeBlocks() {
+    // Add syntax highlighting classes (basic)
+    document.querySelectorAll('code').forEach(block => {
+      if (block.parentElement.tagName === 'PRE') {
+        this.highlightCode(block);
+      }
+    });
+  }
 
-    highlightCode(block) {
-        let html = block.innerHTML;
+  highlightCode(block) {
+    let html = block.innerHTML;
 
-        // Basic syntax highlighting
-        html = html
-            .replace(/\b(function|const|let|var|if|else|for|while|return|async|await|class|import|export|from|default)\b/g, '<span style="color: var(--primary-light)">$1</span>')
-            .replace(/\b(true|false|null|undefined)\b/g, '<span style="color: var(--accent)">$1</span>')
-            .replace(/(['"`])(.*?)\1/g, '<span style="color: var(--success)">$1$2$1</span>')
-            .replace(/\/\/(.*?)$/gm, '<span style="color: var(--text-tertiary)">// $1</span>')
-            .replace(/\b(\d+)\b/g, '<span style="color: var(--warning)">$1</span>');
+    // Basic syntax highlighting
+    html = html
+      .replace(/\b(function|const|let|var|if|else|for|while|return|async|await|class|import|export|from|default)\b/g, '<span style="color: var(--primary-light)">$1</span>')
+      .replace(/\b(true|false|null|undefined)\b/g, '<span style="color: var(--accent)">$1</span>')
+      .replace(/(['"`])(.*?)\1/g, '<span style="color: var(--success)">$1$2$1</span>')
+      .replace(/\/\/(.*?)$/gm, '<span style="color: var(--text-tertiary)">// $1</span>')
+      .replace(/\b(\d+)\b/g, '<span style="color: var(--warning)">$1</span>');
 
-        block.innerHTML = html;
-    }
+    block.innerHTML = html;
+  }
 
-    renderInteractiveDemo(topic) {
-        const demo = topic.interactive;
+  renderVideoResources(topicId) {
+    const resources = videoResources[topicId];
+    if (!resources) return '';
 
-        return `
+    let html = `
+      <div class="section">
+        <h2 class="section-title">📺 Video Tutorials</h2>
+        <p class="explanation">Watch these curated tutorials to deepen your understanding:</p>
+        <div class="video-list">
+    `;
+
+    resources.videos.forEach((video, index) => {
+      html += `
+        <div class="video-card">
+          <div class="video-info">
+            <div class="video-number">${index + 1}</div>
+            <div class="video-details">
+              <h4 class="video-title">${video.title}</h4>
+              <span class="video-duration">⏱️ ${video.duration}</span>
+            </div>
+          </div>
+          <a href="${video.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+            ▶️ Watch
+          </a>
+        </div>
+      `;
+    });
+
+    html += `
+        </div>
+      </div>
+    `;
+
+    return html;
+  }
+
+  renderInteractiveDemo(topic) {
+    const demo = topic.interactive;
+
+    return `
       <div class="section">
         <h2 class="section-title">🎮 ${demo.title}</h2>
         <p class="explanation">${demo.description}</p>
@@ -206,24 +247,24 @@ class LearningPlatform {
         </div>
       </div>
     `;
-    }
+  }
 
-    getInteractiveContent(type, topicId) {
-        switch (type) {
-            case 'api-simulator':
-                return this.createAPISimulator();
-            case 'comparison':
-                return this.createSOAPRESTComparison();
-            case 'debugger':
-                return this.createDebuggerDemo();
-            case 'load-balancer-sim':
-                return this.createLoadBalancerSim();
-            case 'code-editor':
-                return this.createCodeEditor();
-            case 'status-code-quiz':
-                return this.createStatusCodeQuiz();
-            default:
-                return `
+  getInteractiveContent(type, topicId) {
+    switch (type) {
+      case 'api-simulator':
+        return this.createAPISimulator();
+      case 'comparison':
+        return this.createSOAPRESTComparison();
+      case 'debugger':
+        return this.createDebuggerDemo();
+      case 'load-balancer-sim':
+        return this.createLoadBalancerSim();
+      case 'code-editor':
+        return this.createCodeEditor();
+      case 'status-code-quiz':
+        return this.createStatusCodeQuiz();
+      default:
+        return `
           <div class="demo-output">
             <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
               Interactive demo coming soon! 🚀<br><br>
@@ -231,11 +272,11 @@ class LearningPlatform {
             </p>
           </div>
         `;
-        }
     }
+  }
 
-    createAPISimulator() {
-        return `
+  createAPISimulator() {
+    return `
       <div class="demo-controls">
         <button class="demo-button" onclick="app.simulateAPI('GET')">GET Request</button>
         <button class="demo-button" onclick="app.simulateAPI('POST')">POST Request</button>
@@ -246,10 +287,10 @@ class LearningPlatform {
         <p style="color: var(--text-tertiary)">Click a button to simulate an API request...</p>
       </div>
     `;
-    }
+  }
 
-    createSOAPRESTComparison() {
-        return `
+  createSOAPRESTComparison() {
+    return `
       <div class="card-grid">
         <div class="card">
           <div class="card-icon">📋</div>
@@ -275,10 +316,10 @@ class LearningPlatform {
         </div>
       </div>
     `;
-    }
+  }
 
-    createDebuggerDemo() {
-        return `
+  createDebuggerDemo() {
+    return `
       <div class="code-block">
         <div class="code-header">
           <span class="code-language">javascript</span>
@@ -328,10 +369,10 @@ function Counter() {
         </div>
       </div>
     `;
-    }
+  }
 
-    createLoadBalancerSim() {
-        return `
+  createLoadBalancerSim() {
+    return `
       <div class="visualization" id="lb-viz">
         <div style="text-align: center;">
           <div style="margin-bottom: 2rem;">
@@ -360,10 +401,10 @@ function Counter() {
         <button class="demo-button secondary" onclick="app.resetLoadBalancer()">Reset</button>
       </div>
     `;
-    }
+  }
 
-    createCodeEditor() {
-        return `
+  createCodeEditor() {
+    return `
       <div class="code-block">
         <div class="code-header">
           <span class="code-language">Try it yourself</span>
@@ -382,10 +423,10 @@ console.log(twoSum([2, 7, 11, 15], 9));"></textarea>
         <p style="color: var(--text-tertiary)">Output will appear here...</p>
       </div>
     `;
-    }
+  }
 
-    createStatusCodeQuiz() {
-        return `
+  createStatusCodeQuiz() {
+    return `
       <div class="card-grid">
         <div class="card" style="cursor: pointer;" onclick="app.showStatusCode(200)">
           <div class="card-icon">✅</div>
@@ -412,156 +453,156 @@ console.log(twoSum([2, 7, 11, 15], 9));"></textarea>
         <p id="status-meaning"></p>
       </div>
     `;
-    }
+  }
 
-    // Interactive demo methods
-    simulateAPI(method) {
-        const output = document.getElementById('api-output');
-        const examples = {
-            GET: {
-                request: 'GET /api/users/123',
-                response: { id: 123, name: 'John Doe', email: 'john@example.com' },
-                status: 200
-            },
-            POST: {
-                request: 'POST /api/users',
-                body: { name: 'Jane Doe', email: 'jane@example.com' },
-                response: { id: 124, name: 'Jane Doe', email: 'jane@example.com' },
-                status: 201
-            },
-            PUT: {
-                request: 'PUT /api/users/123',
-                body: { name: 'John Smith' },
-                response: { id: 123, name: 'John Smith', email: 'john@example.com' },
-                status: 200
-            },
-            DELETE: {
-                request: 'DELETE /api/users/123',
-                response: { message: 'User deleted successfully' },
-                status: 200
-            }
-        };
+  // Interactive demo methods
+  simulateAPI(method) {
+    const output = document.getElementById('api-output');
+    const examples = {
+      GET: {
+        request: 'GET /api/users/123',
+        response: { id: 123, name: 'John Doe', email: 'john@example.com' },
+        status: 200
+      },
+      POST: {
+        request: 'POST /api/users',
+        body: { name: 'Jane Doe', email: 'jane@example.com' },
+        response: { id: 124, name: 'Jane Doe', email: 'jane@example.com' },
+        status: 201
+      },
+      PUT: {
+        request: 'PUT /api/users/123',
+        body: { name: 'John Smith' },
+        response: { id: 123, name: 'John Smith', email: 'john@example.com' },
+        status: 200
+      },
+      DELETE: {
+        request: 'DELETE /api/users/123',
+        response: { message: 'User deleted successfully' },
+        status: 200
+      }
+    };
 
-        const example = examples[method];
-        let html = `
+    const example = examples[method];
+    let html = `
       <div style="margin-bottom: 1rem;">
         <strong style="color: var(--primary)">Request:</strong><br>
         <code class="inline-code">${example.request}</code>
       </div>
     `;
 
-        if (example.body) {
-            html += `
+    if (example.body) {
+      html += `
         <div style="margin-bottom: 1rem;">
           <strong style="color: var(--secondary)">Body:</strong><br>
           <pre style="margin-top: 0.5rem;"><code>${JSON.stringify(example.body, null, 2)}</code></pre>
         </div>
       `;
-        }
+    }
 
-        html += `
+    html += `
       <div style="margin-bottom: 1rem;">
         <strong style="color: var(--success)">Response (${example.status}):</strong><br>
         <pre style="margin-top: 0.5rem;"><code>${JSON.stringify(example.response, null, 2)}</code></pre>
       </div>
     `;
 
-        output.innerHTML = html;
-    }
+    output.innerHTML = html;
+  }
 
-    showDebugSolution() {
-        const solution = document.getElementById('debug-solution');
-        solution.style.display = 'block';
-    }
+  showDebugSolution() {
+    const solution = document.getElementById('debug-solution');
+    solution.style.display = 'block';
+  }
 
-    sendRequest() {
-        const servers = [1, 2, 3];
-        const randomServer = servers[Math.floor(Math.random() * servers.length)];
-        const countEl = document.getElementById(`server${randomServer}-count`);
-        const currentCount = parseInt(countEl.textContent) || 0;
-        countEl.textContent = `${currentCount + 1} requests`;
-    }
+  sendRequest() {
+    const servers = [1, 2, 3];
+    const randomServer = servers[Math.floor(Math.random() * servers.length)];
+    const countEl = document.getElementById(`server${randomServer}-count`);
+    const currentCount = parseInt(countEl.textContent) || 0;
+    countEl.textContent = `${currentCount + 1} requests`;
+  }
 
-    resetLoadBalancer() {
-        [1, 2, 3].forEach(i => {
-            document.getElementById(`server${i}-count`).textContent = '0 requests';
-        });
-    }
+  resetLoadBalancer() {
+    [1, 2, 3].forEach(i => {
+      document.getElementById(`server${i}-count`).textContent = '0 requests';
+    });
+  }
 
-    runCode() {
-        const code = document.getElementById('code-input').value;
-        const output = document.getElementById('code-output');
+  runCode() {
+    const code = document.getElementById('code-input').value;
+    const output = document.getElementById('code-output');
 
-        try {
-            // Capture console.log
-            const logs = [];
-            const originalLog = console.log;
-            console.log = (...args) => logs.push(args.join(' '));
+    try {
+      // Capture console.log
+      const logs = [];
+      const originalLog = console.log;
+      console.log = (...args) => logs.push(args.join(' '));
 
-            // Run code
-            eval(code);
+      // Run code
+      eval(code);
 
-            // Restore console.log
-            console.log = originalLog;
+      // Restore console.log
+      console.log = originalLog;
 
-            output.innerHTML = `
+      output.innerHTML = `
         <strong style="color: var(--success)">✓ Output:</strong><br>
         <pre style="margin-top: 0.5rem;"><code>${logs.join('\n') || '(no output)'}</code></pre>
       `;
-        } catch (error) {
-            output.innerHTML = `
+    } catch (error) {
+      output.innerHTML = `
         <strong style="color: var(--error)">✗ Error:</strong><br>
         <pre style="margin-top: 0.5rem; color: var(--error);"><code>${error.message}</code></pre>
       `;
-        }
     }
+  }
 
-    showStatusCode(code) {
-        const meanings = {
-            200: '✅ OK - Request succeeded perfectly',
-            401: '🔒 Unauthorized - Need to authenticate (missing or invalid token)',
-            404: '❌ Not Found - The resource doesn\'t exist',
-            500: '💥 Internal Server Error - Something broke on the server'
-        };
+  showStatusCode(code) {
+    const meanings = {
+      200: '✅ OK - Request succeeded perfectly',
+      401: '🔒 Unauthorized - Need to authenticate (missing or invalid token)',
+      404: '❌ Not Found - The resource doesn\'t exist',
+      500: '💥 Internal Server Error - Something broke on the server'
+    };
 
-        const output = document.getElementById('status-output');
-        const meaning = document.getElementById('status-meaning');
-        meaning.innerHTML = `<strong style="color: var(--primary)">${code}:</strong> ${meanings[code]}`;
-        output.style.display = 'block';
+    const output = document.getElementById('status-output');
+    const meaning = document.getElementById('status-meaning');
+    meaning.innerHTML = `<strong style="color: var(--primary)">${code}:</strong> ${meanings[code]}`;
+    output.style.display = 'block';
+  }
+
+  copyCode(button) {
+    const codeBlock = button.closest('.code-block');
+    const code = codeBlock.querySelector('code').textContent;
+
+    navigator.clipboard.writeText(code).then(() => {
+      button.textContent = 'Copied!';
+      setTimeout(() => {
+        button.textContent = 'Copy';
+      }, 2000);
+    });
+  }
+
+  markComplete(topicId) {
+    if (!this.completedTopics.includes(topicId)) {
+      this.completedTopics.push(topicId);
+      this.saveProgress();
+      this.renderTopicList();
+      this.updateProgress();
+
+      // Update button
+      const button = event.target;
+      button.textContent = '✓ Completed';
+      button.className = 'btn btn-success';
+
+      // Show celebration
+      this.showCelebration();
     }
+  }
 
-    copyCode(button) {
-        const codeBlock = button.closest('.code-block');
-        const code = codeBlock.querySelector('code').textContent;
-
-        navigator.clipboard.writeText(code).then(() => {
-            button.textContent = 'Copied!';
-            setTimeout(() => {
-                button.textContent = 'Copy';
-            }, 2000);
-        });
-    }
-
-    markComplete(topicId) {
-        if (!this.completedTopics.includes(topicId)) {
-            this.completedTopics.push(topicId);
-            this.saveProgress();
-            this.renderTopicList();
-            this.updateProgress();
-
-            // Update button
-            const button = event.target;
-            button.textContent = '✓ Completed';
-            button.className = 'btn btn-success';
-
-            // Show celebration
-            this.showCelebration();
-        }
-    }
-
-    showCelebration() {
-        const celebration = document.createElement('div');
-        celebration.style.cssText = `
+  showCelebration() {
+    const celebration = document.createElement('div');
+    celebration.style.cssText = `
       position: fixed;
       top: 50%;
       left: 50%;
@@ -575,52 +616,52 @@ console.log(twoSum([2, 7, 11, 15], 9));"></textarea>
       z-index: 1000;
       animation: fadeIn 0.3s;
     `;
-        celebration.innerHTML = `
+    celebration.innerHTML = `
       <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
       <div style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary);">Great Job!</div>
       <div style="color: var(--text-secondary); margin-top: 0.5rem;">Topic completed</div>
     `;
 
-        document.body.appendChild(celebration);
+    document.body.appendChild(celebration);
 
-        setTimeout(() => {
-            celebration.remove();
-        }, 2000);
-    }
+    setTimeout(() => {
+      celebration.remove();
+    }, 2000);
+  }
 
-    updateProgress() {
-        const total = Object.keys(allTopics).length;
-        const completed = this.completedTopics.length;
-        const percent = Math.round((completed / total) * 100);
+  updateProgress() {
+    const total = Object.keys(allTopics).length;
+    const completed = this.completedTopics.length;
+    const percent = Math.round((completed / total) * 100);
 
-        document.getElementById('progressPercent').textContent = `${percent}%`;
-        document.getElementById('progressFill').style.width = `${percent}%`;
-    }
+    document.getElementById('progressPercent').textContent = `${percent}%`;
+    document.getElementById('progressFill').style.width = `${percent}%`;
+  }
 
-    saveProgress() {
-        localStorage.setItem('completedTopics', JSON.stringify(this.completedTopics));
-    }
+  saveProgress() {
+    localStorage.setItem('completedTopics', JSON.stringify(this.completedTopics));
+  }
 
-    loadProgress() {
-        const saved = localStorage.getItem('completedTopics');
-        return saved ? JSON.parse(saved) : [];
-    }
+  loadProgress() {
+    const saved = localStorage.getItem('completedTopics');
+    return saved ? JSON.parse(saved) : [];
+  }
 }
 
 // Initialize app
 let app;
 window.addEventListener('DOMContentLoaded', () => {
-    app = new LearningPlatform();
+  app = new LearningPlatform();
 
-    // Load topic from URL hash
-    const hash = window.location.hash;
-    if (hash.startsWith('#topic-')) {
-        const topicId = parseInt(hash.replace('#topic-', ''));
-        app.loadTopic(topicId);
-    }
+  // Load topic from URL hash
+  const hash = window.location.hash;
+  if (hash.startsWith('#topic-')) {
+    const topicId = parseInt(hash.replace('#topic-', ''));
+    app.loadTopic(topicId);
+  }
 });
 
 // Make loadTopic available globally for HTML onclick
 function loadTopic(id) {
-    app.loadTopic(id);
+  app.loadTopic(id);
 }

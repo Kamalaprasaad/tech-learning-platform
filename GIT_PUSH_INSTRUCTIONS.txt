@@ -1,0 +1,69 @@
+# Git Push Instructions - Updated Platform
+
+Since Git command line is not available in the current PowerShell session, please use GitHub Desktop to push your updated platform.
+
+## Quick Steps (GitHub Desktop):
+
+### 1. Open GitHub Desktop
+
+### 2. You should see these changes:
+- Modified: `index.html`
+- Modified: `app.js`
+- Modified: `styles.css`
+- New: `video-resources.js`
+
+### 3. Commit message:
+**Summary:**
+```
+Added video tutorials and clickable navigation
+```
+
+**Description:**
+```
+Enhanced learning platform with major improvements:
+- Made welcome page feature cards clickable to navigate to topics
+- Integrated 60+ curated YouTube tutorials for all 21 topics
+- Added video cards with watch buttons and duration display
+- Enhanced CSS with video card styling and hover effects
+- Improved multi-modal learning experience (read, watch, practice)
+```
+
+### 4. Click "Commit to main"
+
+### 5. Click "Push origin"
+
+### 6. Wait 1-2 minutes for GitHub Pages to deploy
+
+### 7. Visit: https://kamalaprasaad.github.io/tech-learning-platform/
+
+---
+
+## Alternative: Restart PowerShell and Try Git
+
+If you want to use Git command line instead:
+
+1. **Close this PowerShell window**
+2. **Open a NEW PowerShell window**
+3. **Navigate to project:**
+   ```powershell
+   cd C:\Users\kamal\.gemini\antigravity\scratch\tech-learning-platform
+   ```
+4. **Run:**
+   ```powershell
+   git add .
+   git commit -m "Added video tutorials and clickable navigation"
+   git push origin main
+   ```
+
+The PATH environment variable updates after Git installation but requires a new terminal session.
+
+---
+
+## What's Being Pushed:
+
+✅ Clickable feature cards on welcome page
+✅ 60+ curated YouTube video tutorials for all topics  
+✅ Beautiful video cards with hover effects
+✅ Enhanced multi-modal learning (read + watch + practice)
+
+Total: 4 files changed, 1 file added

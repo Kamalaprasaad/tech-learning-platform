@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +8,17 @@
   <meta name="description" content="Interactive learning platform for META Business Support Engineer role preparation">
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <div class="app-container">
     <!-- Sidebar -->
     <aside class="sidebar">
       <h1 class="logo">Tech Learning Hub</h1>
-      
+
       <div class="search-box">
         <input type="text" id="searchInput" placeholder="Search topics..." autocomplete="off">
       </div>
-      
+
       <div class="progress-bar">
         <div class="progress-label">
           <span>Your Progress</span>
@@ -26,70 +28,73 @@
           <div class="progress-fill" id="progressFill" style="width: 0%"></div>
         </div>
       </div>
-      
+
       <nav>
         <ul class="topic-list" id="topicList">
           <!-- Topics will be dynamically loaded here -->
         </ul>
       </nav>
     </aside>
-    
+
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
       <div class="topic-header">
         <h1 class="topic-title">Welcome to Your META BSE Learning Journey! 🚀</h1>
         <p class="topic-subtitle">Master the skills needed for a Business Support Engineer role at META</p>
       </div>
-      
+
       <div class="section">
         <h2 class="section-title">About This Platform</h2>
         <p class="explanation">
-          This interactive learning platform is designed to help you prepare for the <strong>META Business Support Engineer</strong> role. 
-          Each topic is explained in simple terms with hands-on examples and real-world applications specific to META's technology stack.
+          This interactive learning platform is designed to help you prepare for the <strong>META Business Support
+            Engineer</strong> role.
+          Each topic is explained in simple terms with hands-on examples and real-world applications specific to META's
+          technology stack.
         </p>
       </div>
-      
+
       <div class="section">
         <h2 class="section-title">What You'll Learn</h2>
         <div class="card-grid">
-          <div class="card">
+          <div class="card" onclick="loadTopic(1)" style="cursor: pointer;">
             <div class="card-icon">🔌</div>
             <h3 class="card-title">APIs & Integration</h3>
-            <p class="card-description">Master REST, SOAP, GraphQL, and how to help partners integrate with META's platforms</p>
+            <p class="card-description">Master REST, SOAP, GraphQL, and how to help partners integrate with META's
+              platforms</p>
           </div>
-          
-          <div class="card">
+
+          <div class="card" onclick="loadTopic(14)" style="cursor: pointer;">
             <div class="card-icon">☁️</div>
             <h3 class="card-title">Cloud Infrastructure</h3>
             <p class="card-description">Learn AWS, Azure, GCP and how to deploy and operate software in the cloud</p>
           </div>
-          
-          <div class="card">
+
+          <div class="card" onclick="loadTopic(19)" style="cursor: pointer;">
             <div class="card-icon">⚛️</div>
             <h3 class="card-title">HACK & React</h3>
             <p class="card-description">Understand META's technology stack including HACK, JavaScript, and React</p>
           </div>
-          
-          <div class="card">
+
+          <div class="card" onclick="loadTopic(3)" style="cursor: pointer;">
             <div class="card-icon">🔍</div>
             <h3 class="card-title">Debugging & Troubleshooting</h3>
             <p class="card-description">Learn systematic approaches to finding and fixing production issues</p>
           </div>
-          
-          <div class="card">
+
+          <div class="card" onclick="loadTopic(15)" style="cursor: pointer;">
             <div class="card-icon">🗄️</div>
             <h3 class="card-title">Databases & SQL</h3>
             <p class="card-description">Master database querying, optimization, and working with large-scale data</p>
           </div>
-          
-          <div class="card">
+
+          <div class="card" onclick="loadTopic(8)" style="cursor: pointer;">
             <div class="card-icon">🤖</div>
             <h3 class="card-title">Gen AI & LLMs</h3>
             <p class="card-description">Understand machine learning, large language models, and agentic automation</p>
           </div>
         </div>
       </div>
-      
+
       <div class="section">
         <h2 class="section-title">How to Use This Platform</h2>
         <ul class="styled-list">
@@ -101,7 +106,7 @@
           <li>Use the search box to quickly find specific topics</li>
         </ul>
       </div>
-      
+
       <div class="section">
         <h2 class="section-title">META BSE Role Overview</h2>
         <p class="explanation">
@@ -117,17 +122,19 @@
           <li>Provide 24/7 on-call support (via rotation)</li>
         </ul>
       </div>
-      
+
       <div class="button-group">
         <button class="btn btn-primary" onclick="loadTopic(1)">Start Learning →</button>
       </div>
     </main>
   </div>
-  
+
   <!-- Scripts -->
+  <script src="video-resources.js"></script>
   <script src="topics-part1.js"></script>
   <script src="topics-part2.js"></script>
   <script src="topics-part3.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>
